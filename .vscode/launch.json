@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "VPHONE Web (mo bang Chrome)",
+            "request": "launch",
+            "mainClass": "Web",
+            "console": "integratedTerminal",
+            "encoding": "UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "VPHONE (MySQL - XAMPP)",
+            "request": "launch",
+            "mainClass": "Main",
+            "console": "integratedTerminal",
+            "encoding": "UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "VPHONE demo tu dong (bo nho)",
+            "request": "launch",
+            "mainClass": "Main",
+            "args": [
+                "--demo"
+            ],
+            "console": "integratedTerminal",
+            "encoding": "UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "VPHONE reset CSDL",
+            "request": "launch",
+            "mainClass": "Main",
+            "args": [
+                "--reset-db"
+            ],
+            "console": "integratedTerminal",
+            "encoding": "UTF-8"
+        }
+    ]
+}
