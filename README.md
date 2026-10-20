@@ -1,6 +1,6 @@
 # VPHONE - Ứng dụng quản lý bán điện thoại bằng Java + MySQL (XAMPP)
 
-Bài tập lớn môn Công nghệ Java. Chương trình có giao diện dòng lệnh (console). Dữ liệu được đọc vào các `ArrayList` để xử lý (tìm kiếm, sắp xếp, thống kê) và **mọi thay đổi đều được ghi xuống MySQL thông qua JDBC**.
+Đây là một bài tập lớn môn Công nghệ Java. Chương trình có giao diện dòng lệnh (console). Dữ liệu được đọc vào các `ArrayList` để xử lý (tìm kiếm, sắp xếp, thống kê) và **mọi thay đổi đều được ghi xuống MySQL thông qua JDBC**.
 
 ## Giao diện web (chạy trên Chrome)
 
@@ -120,10 +120,10 @@ Giỏ hàng chỉ được lưu trong bộ nhớ cho đến khi khách hàng đ�
 
 ## Tài khoản mẫu
 
-| Vai trò | Email | Mật khẩu |
-|---|---|---|
+| Vai trò       | Email             | Mật khẩu   |
+| ------------- | ----------------- | ---------- |
 | Quản trị viên | `admin@vphone.vn` | `admin123` |
-| Khách hàng | `khach@vphone.vn` | `123456` |
+| Khách hàng    | `khach@vphone.vn` | `123456`   |
 
 **Lưu ý:** Mật khẩu hiện được lưu dưới dạng văn bản thuần để đơn giản hóa bài tập. Trong thực tế, nên sử dụng các thuật toán băm mật khẩu an toàn.
 
@@ -181,15 +181,15 @@ DonHang, PhieuNhap, NhaCungCap, ...
 
 ## Đối chiếu với nội dung báo cáo
 
-| Nội dung báo cáo | Mã nguồn tương ứng |
-|---|---|
-| Kế thừa `NguoiDung`, `SanPham`; đa hình | `NguoiDung`, `KhachHang`, `QuanTriVien`, `SanPham`, `DienThoai`, `PhuKien` |
-| Interface | `IManager.java` và các lớp `*Manager` |
-| `ArrayList`, `Comparator`, `Collections.sort` | `SanPhamManager` |
-| Ngoại lệ tự định nghĩa | `InvalidPriceException`, `InvalidQuantityException`, `OutOfStockException`, `DataAccessException` |
-| Lưu đồ 2.2, 2.3, 2.4 | `Main.nhapSanPhamMoi()`, `DonHangManager.taoDonHang()`, `SanPhamManager.timKiem()` / `sapXepTheoGia()` |
-| Kết nối MySQL, JDBC, DAO | `DBConnection`, `DatabaseInit`, các lớp `*DAO` |
-| Giao diện web chạy trên Chrome | `Web.java` (API), `Json.java`, `Vi.java`, thư mục `web/` |
+| Nội dung báo cáo                              | Mã nguồn tương ứng                                                                                     |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Kế thừa `NguoiDung`, `SanPham`; đa hình       | `NguoiDung`, `KhachHang`, `QuanTriVien`, `SanPham`, `DienThoai`, `PhuKien`                             |
+| Interface                                     | `IManager.java` và các lớp `*Manager`                                                                  |
+| `ArrayList`, `Comparator`, `Collections.sort` | `SanPhamManager`                                                                                       |
+| Ngoại lệ tự định nghĩa                        | `InvalidPriceException`, `InvalidQuantityException`, `OutOfStockException`, `DataAccessException`      |
+| Lưu đồ 2.2, 2.3, 2.4                          | `Main.nhapSanPhamMoi()`, `DonHangManager.taoDonHang()`, `SanPhamManager.timKiem()` / `sapXepTheoGia()` |
+| Kết nối MySQL, JDBC, DAO                      | `DBConnection`, `DatabaseInit`, các lớp `*DAO`                                                         |
+| Giao diện web chạy trên Chrome                | `Web.java` (API), `Json.java`, `Vi.java`, thư mục `web/`                                               |
 
 **Lưu ý khi đối chiếu báo cáo:** Tên lớp trong sơ đồ lớp ở mục 2.1.1 có thể khác một số tên trong mã nguồn. Ví dụ:
 
