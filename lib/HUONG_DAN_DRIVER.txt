@@ -1,0 +1,20 @@
+THU MUC lib/ - CAN CO FILE DRIVER JDBC CUA ORACLE (ojdbc11.jar) DE KET NOI DUOC ORACLE
+=====================================================================================
+Chuong trinh Java khong can driver de BIEN DICH, nhung can ojdbc11.jar de CHAY va ket noi Oracle.
+Chep MOT file driver vao thu muc nay (khong de trong thu muc con):
+  - Oracle Database 26ai + JDK 17 tro len: dung ojdbc17.jar neu co, khong thi ojdbc11.jar (deu chay duoc).
+  - JDK 11: dung ojdbc11.jar.   - JDK 8: dung ojdbc8.jar.
+
+Lay file o dau (chon 1 cach):
+ 1) Co san trong thu muc cai Oracle Database cua ban (nho slide cai dat):
+      <ORACLE_HOME>\jdbc\lib\ojdbc11.jar
+    Vi du: C:\app\<ten-ban>\product\26ai\dbhomeFree\jdbc\lib\ojdbc11.jar
+    (hoac tim file ten "ojdbc*.jar" bang Windows Search trong thu muc cai Oracle)
+ 2) Co san trong thu muc cai SQL Developer:
+      <thu-muc-sqldeveloper>\jdbc\lib\ojdbc11.jar   (neu co ojdbc8.jar thi dung file do)
+ 3) Tai tu Maven Central: https://central.sonatype.com/artifact/com.oracle.database.jdbc/ojdbc11
+    (chon ban moi nhat, tai file "ojdbc11-xx.jar" roi doi ten thanh ojdbc11.jar)
+
+Kiem tra: thu muc lib/ phai co dung 1 file ojdbc*.jar (khong de nhieu file ojdbc cung luc).
+Sau khi chep, chay thu lenh:  java -cp "out;lib/*" Main --check-db   de xem ket noi, phien ban Oracle va driver.
+Neu chay ma bao "No suitable driver": thieu file nay hoac sai thu muc.
