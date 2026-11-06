@@ -3,8 +3,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-/** Chương trình VPHONE - giao diện dòng lệnh, lưu dữ liệu vào MySQL (XAMPP).
- *  Chạy: java Main | java Main --demo (bộ nhớ) | java Main --reset-db */
+/** Chương trình VPHONE - giao diện dòng lệnh, lưu dữ liệu vào Oracle.
+ *  Chạy: java Main | --demo (bộ nhớ) | --check-db (kiểm tra kết nối) | --reset-db */
 public class Main {
     private static final Scanner SC = new Scanner(System.in);
     private static CuaHang CH;
@@ -16,11 +16,19 @@ public class Main {
             Demo.chay(CH);
             return;
         }
+        if (args.length > 0 && args[0].equals("--check-db")) {
+            try {
+                System.out.println(DBConnection.thongTin());
+                System.out.println(DatabaseInit.trangThaiBang());
+            } catch (DataAccessException e) {
+                System.out.println("[Loi CSDL] " + e.getMessage());
+            }
+            return;
+        }
         if (args.length > 0 && args[0].equals("--reset-db")) {
             try {
                 DatabaseInit.xoaVaTaoLai();
-                System.out.println("Da xoa va tao lai CSDL '" + DBConnection.getTenCSDL()
-                        + "'. Lan chay tiep theo se nap lai du lieu mau.");
+                System.out.println("Da xoa va tao lai cac bang trong schema cua user ket noi. Lan chay tiep theo se nap lai du lieu mau.");
             } catch (DataAccessException e) {
                 System.out.println("[Loi CSDL] " + e.getMessage());
             }
@@ -179,7 +187,7 @@ public class Main {
         if (!g.isEmpty()) sp.setGiaBan(Double.parseDouble(g));
         String s = doc("So luong ton moi (Enter de giu nguyen): ");
         if (!s.isEmpty()) sp.setSoLuongTon(Integer.parseInt(s));
-        CH.sanPham.capNhat(sp);                 // ghi xuong CSDL (neu dang dung MySQL)
+        CH.sanPham.capNhat(sp);                 // ghi xuong CSDL (neu dang dung Oracle)
         System.out.println("Da cap nhat:");
         SanPhamManager.inDanhSach(java.util.Collections.singletonList(sp));
     }

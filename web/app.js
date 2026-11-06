@@ -78,7 +78,7 @@ function veKhung() {
     ub.append(el('button', { class: 'btn btn-sm btn-ghost-light', onclick: () => hopDangNhap('login') }, 'Đăng nhập / Đăng ký'));
   }
   const ft = $('#footer'); ft.replaceChildren();
-  if (S.info) ft.append(el('span', { class: 'dot' + (S.info.cheDo === 'MySQL' ? '' : ' mem') }),
+  if (S.info) ft.append(el('span', { class: 'dot' + (S.info.cheDo === 'Oracle' ? '' : ' mem') }),
     `Dữ liệu: ${S.info.cheDo}. `, el('span', { class: 'muted', text: S.info.csdl }), ' · VPHONE - Bài tập lớn Công nghệ Java');
 }
 

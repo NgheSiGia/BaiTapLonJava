@@ -2,7 +2,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -42,9 +41,10 @@ public class NhaCungCapDAO {
              PreparedStatement ps = c.prepareStatement("DELETE FROM nha_cung_cap WHERE ma_ncc=?")) {
             ps.setString(1, ma);
             ps.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalStateException("Khong the xoa nha cung cap '" + ma + "' vi da co phieu nhap");
         } catch (SQLException e) {
+            if (DBConnection.laLoiKhoaNgoai(e)) {
+                throw new IllegalStateException("Khong the xoa nha cung cap '" + ma + "' vi da co phieu nhap");
+            }
             throw new DataAccessException("Loi xoa nha cung cap: " + e.getMessage(), e);
         }
     }

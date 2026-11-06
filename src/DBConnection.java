@@ -6,16 +6,14 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * Quản lý kết nối JDBC tới MySQL/MariaDB (XAMPP). Cấu hình đọc từ file db.properties
- * trong thư mục chạy chương trình; thiếu file thì dùng mặc định của XAMPP.
+ * Quản lý kết nối JDBC tới Oracle Database (bản Free 23ai/26ai, PDB mặc định FREEPDB1).
+ * Cấu hình đọc từ file db.properties trong thư mục chạy chương trình; thiếu file thì dùng giá trị mặc định.
+ * Cần file driver ojdbc11.jar (hoặc ojdbc8.jar) trong thư mục lib.
  */
 public final class DBConnection {
-    private static String driver = "mariadb";   // "mariadb" hoặc "mysql" (tùy file .jar trong thư mục lib)
-    private static String host = "localhost";
-    private static String port = "3306";
-    private static String tenCSDL = "vphone";
-    private static String user = "root";
-    private static String password = "";
+    private static final String url;
+    private static final String user;
+    private static final String password;
 
     static {
         Properties p = new Properties();
@@ -24,38 +22,76 @@ public final class DBConnection {
         } catch (IOException e) {
             // không có file cấu hình: dùng giá trị mặc định
         }
-        driver = p.getProperty("db.driver", driver).trim();
-        host = p.getProperty("db.host", host).trim();
-        port = p.getProperty("db.port", port).trim();
-        tenCSDL = p.getProperty("db.name", tenCSDL).trim();
-        user = p.getProperty("db.user", user).trim();
-        password = p.getProperty("db.password", password);
+        String host = p.getProperty("db.host", "localhost").trim();
+        String port = p.getProperty("db.port", "1521").trim();
+        String service = p.getProperty("db.service", "freepdb1").trim();
+        String tuDat = p.getProperty("db.url", "").trim();     // cho phép ghi đè nguyên chuỗi JDBC
+        url = tuDat.isEmpty() ? "jdbc:oracle:thin:@//" + host + ":" + port + "/" + service : tuDat;
+        user = p.getProperty("db.user", "vphone").trim();
+        password = p.getProperty("db.password", "vphone123");
     }
 
     private DBConnection() { }
 
-    public static String getTenCSDL() { return tenCSDL; }
-
     public static String moTa() {
-        return "jdbc:" + driver + "://" + host + ":" + port + "/" + tenCSDL + " (user " + user + ")";
+        return url + " (user " + user + ")";
     }
 
-    /** Kết nối tới CSDL vphone. */
+    /** Mở một kết nối mới tới Oracle. */
     public static Connection layKetNoi() {
-        return mo(tenCSDL);
-    }
-
-    /** Kết nối tới máy chủ (chưa chọn CSDL) - dùng khi cần tạo CSDL. */
-    public static Connection layKetNoiMayChu() {
-        return mo("");
-    }
-
-    private static Connection mo(String db) {
-        String url = "jdbc:" + driver + "://" + host + ":" + port + "/" + db;
         try {
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
-            throw new DataAccessException("Khong ket noi duoc MySQL (" + url + "): " + e.getMessage(), e);
+            throw new DataAccessException("Khong ket noi duoc Oracle (" + url + "): "
+                    + e.getMessage() + goiY(e), e);
+        }
+    }
+
+    /** Thông tin máy chủ, phiên bản Oracle, driver và schema đang dùng (lệnh: java Main --check-db). */
+    public static String thongTin() {
+        try (Connection c = layKetNoi()) {
+            java.sql.DatabaseMetaData md = c.getMetaData();
+            StringBuilder sb = new StringBuilder();
+            sb.append("Ket noi thanh cong den: ").append(moTa()).append('\n');
+            sb.append("May chu : ").append(md.getDatabaseProductName()).append(" - ")
+              .append(md.getDatabaseProductVersion().replace('\n', ' ')).append('\n');
+            sb.append("Driver  : ").append(md.getDriverName()).append(' ').append(md.getDriverVersion()).append('\n');
+            sb.append("Schema  : ").append(c.getSchema());
+            return sb.toString();
+        } catch (SQLException e) {
+            throw new DataAccessException("Khong doc duoc thong tin may chu: " + e.getMessage(), e);
+        }
+    }
+
+    /** Vi phạm ràng buộc khóa ngoại (ví dụ ORA-02292: xóa dòng cha còn dòng con). */
+    public static boolean laLoiKhoaNgoai(SQLException e) {
+        return e instanceof java.sql.SQLIntegrityConstraintViolationException
+                || e.getErrorCode() == 2292 || e.getErrorCode() == 2291
+                || (e.getSQLState() != null && e.getSQLState().startsWith("23"));
+    }
+
+    /** Gợi ý khắc phục các lỗi kết nối Oracle thường gặp (không dấu để hiện trên console). */
+    private static String goiY(SQLException e) {
+        String m = e.getMessage() == null ? "" : e.getMessage();
+        switch (e.getErrorCode()) {
+            case 1017:
+                return "\n   Goi y: sai user/mat khau, hoac chua tao user - hay chay sql/01_tao_user_oracle.sql bang SYSDBA.";
+            case 28000:
+                return "\n   Goi y: tai khoan bi khoa - chay: ALTER USER vphone ACCOUNT UNLOCK;";
+            case 12541:
+                return "\n   Goi y: service TNSListener chua chay - start service nay roi doi khoang 1 phut.";
+            case 12514:
+                return "\n   Goi y: sai service name (kiem tra db.service, vi du freepdb1) hoac OracleServiceFREE chua Running.";
+            case 12560:
+                return "\n   Goi y: thieu Service Name / ORACLE_SID - kiem tra lai db.properties.";
+            case 1034:
+            case 27101:
+                return "\n   Goi y: instance Oracle chua startup - start OracleServiceFREE.";
+            default:
+                if (m.contains("No suitable driver")) {
+                    return "\n   Goi y: chua co driver JDBC - chep ojdbc11.jar vao thu muc lib (xem lib/HUONG_DAN_DRIVER.txt).";
+                }
+                return "";
         }
     }
 }

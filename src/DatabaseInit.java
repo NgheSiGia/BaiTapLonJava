@@ -1,106 +1,148 @@
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/** Tạo CSDL và các bảng nếu chưa có (giống hệt file sql/schema.sql). */
+/** Tạo các bảng trong schema của user kết nối (giống hệt file sql/02_tao_bang_oracle.sql). */
 public final class DatabaseInit {
     private DatabaseInit() { }
 
-    private static final String[] DDL = {
-        "CREATE TABLE IF NOT EXISTS nguoi_dung ("
-        + " ma_nguoi_dung VARCHAR(20) PRIMARY KEY,"
-        + " ho_ten VARCHAR(100) NOT NULL,"
-        + " email VARCHAR(100) NOT NULL UNIQUE,"
-        + " mat_khau VARCHAR(100) NOT NULL,"
-        + " so_dien_thoai VARCHAR(20) NOT NULL DEFAULT '',"
-        + " vai_tro VARCHAR(20) NOT NULL,"
-        + " dia_chi VARCHAR(200) NOT NULL DEFAULT '',"
-        + " chuc_vu VARCHAR(100) NOT NULL DEFAULT ''"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS san_pham ("
-        + " ma_sp VARCHAR(20) PRIMARY KEY,"
-        + " ten_sp VARCHAR(150) NOT NULL,"
-        + " hang VARCHAR(50) NOT NULL,"
-        + " gia_ban DECIMAL(15,0) NOT NULL CHECK (gia_ban > 0),"
-        + " so_luong_ton INT NOT NULL CHECK (so_luong_ton >= 0),"
-        + " loai VARCHAR(20) NOT NULL,"
-        + " ram INT NULL,"
-        + " bo_nho INT NULL,"
-        + " mau_sac VARCHAR(50) NULL,"
-        + " loai_phu_kien VARCHAR(100) NULL"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS nha_cung_cap ("
-        + " ma_ncc VARCHAR(20) PRIMARY KEY,"
-        + " ten_ncc VARCHAR(150) NOT NULL,"
-        + " dia_chi VARCHAR(200) NOT NULL DEFAULT '',"
-        + " so_dien_thoai VARCHAR(20) NOT NULL DEFAULT ''"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS don_hang ("
-        + " ma_don_hang VARCHAR(20) PRIMARY KEY,"
-        + " ma_khach_hang VARCHAR(20) NOT NULL,"
-        + " ten_khach_hang VARCHAR(100) NOT NULL,"
-        + " ngay_dat DATE NOT NULL,"
-        + " trang_thai VARCHAR(20) NOT NULL,"
-        + " FOREIGN KEY (ma_khach_hang) REFERENCES nguoi_dung(ma_nguoi_dung)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS chi_tiet_don_hang ("
-        + " id INT AUTO_INCREMENT PRIMARY KEY,"
-        + " ma_don_hang VARCHAR(20) NOT NULL,"
-        + " ma_sp VARCHAR(20) NOT NULL,"
-        + " so_luong INT NOT NULL CHECK (so_luong > 0),"
-        + " don_gia DECIMAL(15,0) NOT NULL,"
-        + " FOREIGN KEY (ma_don_hang) REFERENCES don_hang(ma_don_hang) ON DELETE CASCADE,"
-        + " FOREIGN KEY (ma_sp) REFERENCES san_pham(ma_sp)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS phieu_nhap ("
-        + " ma_phieu VARCHAR(20) PRIMARY KEY,"
-        + " ma_ncc VARCHAR(20) NOT NULL,"
-        + " ma_quan_tri VARCHAR(20) NOT NULL,"
-        + " ngay_nhap DATE NOT NULL,"
-        + " FOREIGN KEY (ma_ncc) REFERENCES nha_cung_cap(ma_ncc),"
-        + " FOREIGN KEY (ma_quan_tri) REFERENCES nguoi_dung(ma_nguoi_dung)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-
-        "CREATE TABLE IF NOT EXISTS chi_tiet_phieu_nhap ("
-        + " id INT AUTO_INCREMENT PRIMARY KEY,"
-        + " ma_phieu VARCHAR(20) NOT NULL,"
-        + " ma_sp VARCHAR(20) NOT NULL,"
-        + " so_luong_nhap INT NOT NULL CHECK (so_luong_nhap > 0),"
-        + " gia_nhap DECIMAL(15,0) NOT NULL CHECK (gia_nhap > 0),"
-        + " FOREIGN KEY (ma_phieu) REFERENCES phieu_nhap(ma_phieu) ON DELETE CASCADE,"
-        + " FOREIGN KEY (ma_sp) REFERENCES san_pham(ma_sp)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    /** Tên bảng (viết hoa, đúng như Oracle lưu) và câu lệnh tạo bảng; thứ tự theo khóa ngoại. */
+    private static final String[][] DDL = {
+        {"NGUOI_DUNG", String.join("\n",
+            "CREATE TABLE nguoi_dung (",
+            "  ma_nguoi_dung  VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ho_ten         VARCHAR2(100 CHAR) NOT NULL,",
+            "  email          VARCHAR2(100 CHAR) NOT NULL,",
+            "  mat_khau       VARCHAR2(100 CHAR) NOT NULL,",
+            "  so_dien_thoai  VARCHAR2(20 CHAR),",
+            "  vai_tro        VARCHAR2(20 CHAR)  NOT NULL,",
+            "  dia_chi        VARCHAR2(200 CHAR),",
+            "  chuc_vu        VARCHAR2(100 CHAR),",
+            "  CONSTRAINT pk_nguoi_dung PRIMARY KEY (ma_nguoi_dung),",
+            "  CONSTRAINT uq_nguoi_dung_email UNIQUE (email),",
+            "  CONSTRAINT ck_nguoi_dung_vai_tro CHECK (vai_tro IN ('KHACH_HANG', 'QUAN_TRI'))",
+            ")")},
+        {"SAN_PHAM", String.join("\n",
+            "CREATE TABLE san_pham (",
+            "  ma_sp          VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ten_sp         VARCHAR2(150 CHAR) NOT NULL,",
+            "  hang           VARCHAR2(50 CHAR)  NOT NULL,",
+            "  gia_ban        NUMBER(15,0)       NOT NULL,",
+            "  so_luong_ton   NUMBER(10,0)       NOT NULL,",
+            "  loai           VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ram            NUMBER(5,0),",
+            "  bo_nho         NUMBER(6,0),",
+            "  mau_sac        VARCHAR2(50 CHAR),",
+            "  loai_phu_kien  VARCHAR2(100 CHAR),",
+            "  CONSTRAINT pk_san_pham PRIMARY KEY (ma_sp),",
+            "  CONSTRAINT ck_san_pham_gia CHECK (gia_ban > 0),",
+            "  CONSTRAINT ck_san_pham_ton CHECK (so_luong_ton >= 0),",
+            "  CONSTRAINT ck_san_pham_loai CHECK (loai IN ('DIEN_THOAI', 'PHU_KIEN', 'KHAC'))",
+            ")")},
+        {"NHA_CUNG_CAP", String.join("\n",
+            "CREATE TABLE nha_cung_cap (",
+            "  ma_ncc         VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ten_ncc        VARCHAR2(150 CHAR) NOT NULL,",
+            "  dia_chi        VARCHAR2(200 CHAR),",
+            "  so_dien_thoai  VARCHAR2(20 CHAR),",
+            "  CONSTRAINT pk_nha_cung_cap PRIMARY KEY (ma_ncc)",
+            ")")},
+        {"DON_HANG", String.join("\n",
+            "CREATE TABLE don_hang (",
+            "  ma_don_hang    VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ma_khach_hang  VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ten_khach_hang VARCHAR2(100 CHAR) NOT NULL,",
+            "  ngay_dat       DATE               NOT NULL,",
+            "  trang_thai     VARCHAR2(20 CHAR)  NOT NULL,",
+            "  CONSTRAINT pk_don_hang PRIMARY KEY (ma_don_hang),",
+            "  CONSTRAINT fk_dh_khach FOREIGN KEY (ma_khach_hang) REFERENCES nguoi_dung (ma_nguoi_dung),",
+            "  CONSTRAINT ck_dh_trang_thai CHECK (trang_thai IN ('CHO_XAC_NHAN', 'DANG_GIAO', 'HOAN_THANH', 'DA_HUY'))",
+            ")")},
+        {"CHI_TIET_DON_HANG", String.join("\n",
+            "CREATE TABLE chi_tiet_don_hang (",
+            "  id             NUMBER GENERATED BY DEFAULT AS IDENTITY,",
+            "  ma_don_hang    VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ma_sp          VARCHAR2(20 CHAR)  NOT NULL,",
+            "  so_luong       NUMBER(10,0)       NOT NULL,",
+            "  don_gia        NUMBER(15,0)       NOT NULL,",
+            "  CONSTRAINT pk_ct_don_hang PRIMARY KEY (id),",
+            "  CONSTRAINT ck_ctdh_so_luong CHECK (so_luong > 0),",
+            "  CONSTRAINT fk_ctdh_dh FOREIGN KEY (ma_don_hang) REFERENCES don_hang (ma_don_hang) ON DELETE CASCADE,",
+            "  CONSTRAINT fk_ctdh_sp FOREIGN KEY (ma_sp) REFERENCES san_pham (ma_sp)",
+            ")")},
+        {"PHIEU_NHAP", String.join("\n",
+            "CREATE TABLE phieu_nhap (",
+            "  ma_phieu       VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ma_ncc         VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ma_quan_tri    VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ngay_nhap      DATE               NOT NULL,",
+            "  CONSTRAINT pk_phieu_nhap PRIMARY KEY (ma_phieu),",
+            "  CONSTRAINT fk_pn_ncc FOREIGN KEY (ma_ncc) REFERENCES nha_cung_cap (ma_ncc),",
+            "  CONSTRAINT fk_pn_quan_tri FOREIGN KEY (ma_quan_tri) REFERENCES nguoi_dung (ma_nguoi_dung)",
+            ")")},
+        {"CHI_TIET_PHIEU_NHAP", String.join("\n",
+            "CREATE TABLE chi_tiet_phieu_nhap (",
+            "  id             NUMBER GENERATED BY DEFAULT AS IDENTITY,",
+            "  ma_phieu       VARCHAR2(20 CHAR)  NOT NULL,",
+            "  ma_sp          VARCHAR2(20 CHAR)  NOT NULL,",
+            "  so_luong_nhap  NUMBER(10,0)       NOT NULL,",
+            "  gia_nhap       NUMBER(15,0)       NOT NULL,",
+            "  CONSTRAINT pk_ct_phieu_nhap PRIMARY KEY (id),",
+            "  CONSTRAINT ck_ctpn_so_luong CHECK (so_luong_nhap > 0),",
+            "  CONSTRAINT ck_ctpn_gia CHECK (gia_nhap > 0),",
+            "  CONSTRAINT fk_ctpn_pn FOREIGN KEY (ma_phieu) REFERENCES phieu_nhap (ma_phieu) ON DELETE CASCADE,",
+            "  CONSTRAINT fk_ctpn_sp FOREIGN KEY (ma_sp) REFERENCES san_pham (ma_sp)",
+            ")")},
     };
 
-    /** Tạo CSDL (nếu chưa có) và toàn bộ bảng. */
-    public static void taoCSDLVaBang() {
-        try (Connection c = DBConnection.layKetNoiMayChu(); Statement st = c.createStatement()) {
-            st.executeUpdate("CREATE DATABASE IF NOT EXISTS `" + DBConnection.getTenCSDL()
-                    + "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        } catch (SQLException e) {
-            throw new DataAccessException("Khong tao duoc CSDL: " + e.getMessage(), e);
-        }
+    /** Tạo các bảng còn thiếu (Oracle không có CREATE TABLE IF NOT EXISTS ở bản cũ nên kiểm tra bằng metadata). */
+    public static void taoBang() {
         try (Connection c = DBConnection.layKetNoi(); Statement st = c.createStatement()) {
-            for (String sql : DDL) {
-                st.executeUpdate(sql);
+            for (String[] t : DDL) {
+                if (!tonTai(c, t[0])) {
+                    st.executeUpdate(t[1]);
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Khong tao duoc bang: " + e.getMessage(), e);
         }
     }
 
-    /** Xóa toàn bộ CSDL rồi tạo lại (dùng cho lệnh: java Main --reset-db). */
+    /** Xóa toàn bộ 7 bảng rồi tạo lại (dùng cho lệnh: java Main --reset-db). */
     public static void xoaVaTaoLai() {
-        try (Connection c = DBConnection.layKetNoiMayChu(); Statement st = c.createStatement()) {
-            st.executeUpdate("DROP DATABASE IF EXISTS `" + DBConnection.getTenCSDL() + "`");
+        try (Connection c = DBConnection.layKetNoi(); Statement st = c.createStatement()) {
+            for (int i = DDL.length - 1; i >= 0; i--) {
+                if (tonTai(c, DDL[i][0])) {
+                    st.executeUpdate("DROP TABLE " + DDL[i][0] + " CASCADE CONSTRAINTS");
+                }
+            }
         } catch (SQLException e) {
-            throw new DataAccessException("Khong xoa duoc CSDL: " + e.getMessage(), e);
+            throw new DataAccessException("Khong xoa duoc bang: " + e.getMessage(), e);
         }
-        taoCSDLVaBang();
+        taoBang();
+    }
+
+    /** Cho biết trong 7 bảng của chương trình, bảng nào đã tồn tại (phục vụ kiểm tra kết nối). */
+    public static String trangThaiBang() {
+        StringBuilder sb = new StringBuilder();
+        try (Connection c = DBConnection.layKetNoi()) {
+            int co = 0;
+            for (String[] t : DDL) {
+                boolean ok = tonTai(c, t[0]);
+                if (ok) co++;
+                sb.append(String.format("  %-22s %s%n", t[0], ok ? "da co" : "chua co"));
+            }
+            sb.append("Tong: ").append(co).append('/').append(DDL.length).append(" bang");
+        } catch (SQLException e) {
+            throw new DataAccessException("Khong kiem tra duoc bang: " + e.getMessage(), e);
+        }
+        return sb.toString();
+    }
+
+    private static boolean tonTai(Connection c, String tenBang) throws SQLException {
+        try (ResultSet rs = c.getMetaData().getTables(null, c.getSchema(), tenBang, new String[] {"TABLE"})) {
+            return rs.next();
+        }
     }
 }

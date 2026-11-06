@@ -1,4 +1,4 @@
-/** Gom các lớp quản lý lại một chỗ; nạp dữ liệu từ MySQL (XAMPP) hoặc dữ liệu mẫu trong bộ nhớ. */
+/** Gom các lớp quản lý lại một chỗ; nạp dữ liệu từ Oracle hoặc dữ liệu mẫu trong bộ nhớ. */
 public class CuaHang {
     public final SanPhamManager sanPham;
     public final NguoiDungManager nguoiDung;
@@ -13,7 +13,7 @@ public class CuaHang {
     private final DonHangDAO donHangDAO;
     private final PhieuNhapDAO phieuNhapDAO;
 
-    /** dungCSDL = true: ghi mọi thay đổi xuống MySQL; false: chỉ lưu trong bộ nhớ (ArrayList). */
+    /** dungCSDL = true: ghi mọi thay đổi xuống Oracle; false: chỉ lưu trong bộ nhớ (ArrayList). */
     public CuaHang(boolean dungCSDL) {
         this.dungCSDL = dungCSDL;
         sanPhamDAO = dungCSDL ? new SanPhamDAO() : null;
@@ -31,31 +31,31 @@ public class CuaHang {
     public boolean isDungCSDL() { return dungCSDL; }
 
     /**
-     * Thử kết nối MySQL: tạo CSDL/bảng nếu chưa có, đọc dữ liệu lên ArrayList, nạp dữ liệu mẫu nếu CSDL trống.
+     * Thử kết nối Oracle: tạo các bảng nếu chưa có, đọc dữ liệu lên ArrayList, nạp dữ liệu mẫu nếu CSDL trống.
      * Không kết nối được thì báo và chuyển sang chế độ bộ nhớ.
      */
     public static CuaHang khoiTao() {
         try {
-            DatabaseInit.taoCSDLVaBang();
+            DatabaseInit.taoBang();
             CuaHang ch = new CuaHang(true);
             ch.napTuCSDL();
             if (ch.sanPham.layTatCa().isEmpty() && ch.nguoiDung.layTatCa().isEmpty()) {
                 ch.napDuLieuMau();
                 System.out.println("(CSDL con trong: da nap du lieu mau)");
             }
-            System.out.println("Che do: MySQL - " + DBConnection.moTa());
+            System.out.println("Che do: Oracle - " + DBConnection.moTa());
             return ch;
         } catch (DataAccessException e) {
             System.out.println("[Canh bao] " + e.getMessage());
             System.out.println("-> Chuyen sang che do BO NHO (du lieu se mat khi tat chuong trinh).");
-            System.out.println("   Hay bat MySQL trong XAMPP Control Panel roi chay lai de luu vao CSDL.");
+            System.out.println("   Hay bat Oracle (OracleServiceFREE, TNSListener), chay sql/01_tao_user_oracle.sql roi chay lai de luu vao CSDL.");
             CuaHang ch = new CuaHang(false);
             ch.napDuLieuMau();
             return ch;
         }
     }
 
-    /** Đọc toàn bộ dữ liệu từ MySQL vào các ArrayList (theo thứ tự phụ thuộc khóa ngoại). */
+    /** Đọc toàn bộ dữ liệu từ Oracle vào các ArrayList (theo thứ tự phụ thuộc khóa ngoại). */
     private void napTuCSDL() {
         sanPham.napDanhSach(sanPhamDAO.layTatCa());
         nguoiDung.napDanhSach(nguoiDungDAO.layTatCa());

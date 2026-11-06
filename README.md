@@ -1,4 +1,4 @@
-# VPHONE - Ứng dụng quản lý bán điện thoại bằng Java + MySQL (XAMPP)
+# VPHONE - Ung dung quan ly ban dien thoai bang Java + Oracle Database
 
 Đây là một bài tập lớn môn Công nghệ Java. Chương trình có giao diện dòng lệnh (console). Dữ liệu được đọc vào các `ArrayList` để xử lý (tìm kiếm, sắp xếp, thống kê) và **mọi thay đổi đều được ghi xuống MySQL thông qua JDBC**.
 

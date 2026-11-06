@@ -123,8 +123,8 @@ public class Web {
 
         if (goc.equals("info") && get) {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("cheDo", CH.isDungCSDL() ? "MySQL" : "Bộ nhớ");
-            m.put("csdl", CH.isDungCSDL() ? DBConnection.moTa() : "Dữ liệu chỉ lưu trong bộ nhớ (chưa kết nối MySQL)");
+            m.put("cheDo", CH.isDungCSDL() ? "Oracle" : "Bộ nhớ");
+            m.put("csdl", CH.isDungCSDL() ? DBConnection.moTa() : "Dữ liệu chỉ lưu trong bộ nhớ (chưa kết nối Oracle)");
             return m;
         }
         if (goc.equals("login") && post) {

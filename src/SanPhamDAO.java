@@ -2,7 +2,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -79,10 +78,11 @@ public class SanPhamDAO {
              PreparedStatement ps = c.prepareStatement("DELETE FROM san_pham WHERE ma_sp=?")) {
             ps.setString(1, ma);
             ps.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalStateException("Khong the xoa san pham '" + ma
-                    + "' vi da co trong don hang hoac phieu nhap");
         } catch (SQLException e) {
+            if (DBConnection.laLoiKhoaNgoai(e)) {
+                throw new IllegalStateException("Khong the xoa san pham '" + ma
+                        + "' vi da co trong don hang hoac phieu nhap");
+            }
             throw new DataAccessException("Loi xoa san pham: " + e.getMessage(), e);
         }
     }
