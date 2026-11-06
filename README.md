@@ -221,16 +221,15 @@ I. QUY TẮC ĐẶT TÊN NHÁNH
 
 II. QUY TẮC ĐẶT TÊN COMMIT
 
-Cấu trúc: (api name): - Các loại type:
-
-- feat: --VD: feat(user): add reset password endpoint
-- fix: --VD: fix(user): otp not clearing after verification
-- refactor: --VD:refactor(user): extract otp logic to separate service
-- style: --VD: style(user): Format code
-- test: --VD: test(user): Add unit tests for user service
-- hotfix: --VD: hotfix(user): fix user registration bug
-- chore: --VD: chore(user) configure lombok and annotation processor
-- docs: --VD: docs(readme) add guideline for branch naming
+- Cấu trúc: (api name): - Các loại type:
+  - feat: --VD: feat(user): add reset password endpoint
+  - fix: --VD: fix(user): otp not clearing after verification
+  - refactor: --VD:refactor(user): extract otp logic to separate service
+  - style: --VD: style(user): Format code
+  - test: --VD: test(user): Add unit tests for user service
+  - hotfix: --VD: hotfix(user): fix user registration bug
+  - chore: --VD: chore(user) configure lombok and annotation processor
+  - docs: --VD: docs(readme) add guideline for branch naming
 
 III. Git
 
