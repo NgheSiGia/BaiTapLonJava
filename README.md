@@ -120,6 +120,8 @@ Giỏ hàng chỉ được lưu trong bộ nhớ cho đến khi khách hàng đ�
 
 ## Tài khoản mẫu
 
+Ví du:
+
 | Vai trò       | Email             | Mật khẩu   |
 | ------------- | ----------------- | ---------- |
 | Quản trị viên | `admin@vphone.vn` | `admin123` |
