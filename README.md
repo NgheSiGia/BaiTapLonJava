@@ -211,27 +211,28 @@ DonHang, PhieuNhap, NhaCungCap, ...
 
 I. QUY TẮC ĐẶT TÊN NHÁNH
 
-Cấu trúc chung: /- - Các loại type:
-feat: Tính năng mới --VD: feat/user
-fix: Sửa lỗi --VD: fix/user
-refactor: Cải tiến code không đổi Logic --VD: refactor/user
-hotfix: sửa lỗi khẩn cấp --VD: hotfix/user
-chore: Việc phụ trợ(Cấu hình, build, CI, CD) --VD: chore/user
-docs: Cập nhật tài liệu --VD: docs/readme
+- Cấu trúc chung: /- - Các loại type:
+  - feat: Tính năng mới --VD: feat/user
+  - fix: Sửa lỗi --VD: fix/user
+  - refactor: Cải tiến code không đổi Logic --VD: - refactor/user
+  - hotfix: sửa lỗi khẩn cấp --VD: hotfix/user
+  - chore: Việc phụ trợ(Cấu hình, build, CI, CD) --VD: chore/user
+  - docs: Cập nhật tài liệu --VD: docs/readme
 
 II. QUY TẮC ĐẶT TÊN COMMIT
 
 Cấu trúc: (api name): - Các loại type:
-feat: --VD: feat(user): add reset password endpoint
-fix: --VD: fix(user): otp not clearing after verification
-refactor: --VD:refactor(user): extract otp logic to separate service
-style: --VD: style(user): Format code
-test: --VD: test(user): Add unit tests for user service
-hotfix: --VD: hotfix(user): fix user registration bug
-chore: --VD: chore(user) configure lombok and annotation processor
-docs: --VD: docs(readme) add guideline for branch naming
+
+- feat: --VD: feat(user): add reset password endpoint
+- fix: --VD: fix(user): otp not clearing after verification
+- refactor: --VD:refactor(user): extract otp logic to separate service
+- style: --VD: style(user): Format code
+- test: --VD: test(user): Add unit tests for user service
+- hotfix: --VD: hotfix(user): fix user registration bug
+- chore: --VD: chore(user) configure lombok and annotation processor
+- docs: --VD: docs(readme) add guideline for branch naming
 
 III. Git
 
-Kéo code mới nhất từ nhánh master: trước khi bắt đầu làm
-Không được push hoặc merge code vào nhánh chính: ❌ git push origin master ❌ git merge master
+- Kéo code mới nhất từ nhánh master: trước khi bắt đầu làm
+- Không được push hoặc merge code vào nhánh chính: ❌ git push origin master ❌ git merge master
